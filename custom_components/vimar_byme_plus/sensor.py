@@ -46,17 +46,13 @@ class Sensor(BaseEntity, RestoreSensor):
     """
 
     _component: VimarSensor
-    temp_measure: dict
     previous_measure: dict
-    current_measure: dict
     _running_total: Decimal | None
 
     def __init__(self, coordinator: Coordinator, component: VimarSensor) -> None:
         """Initialize the sensor."""
         self._component = component
-        self.temp_measure = self._create_measure()
-        self.previous_measure = self._create_measure()
-        self.current_measure = self._create_measure(component)
+        self.previous_measure = self._create_measure(component)
         self._running_total = None
         BaseEntity.__init__(self, coordinator, component)
 
@@ -113,41 +109,43 @@ class Sensor(BaseEntity, RestoreSensor):
 
     @callback
     def _handle_coordinator_update(self) -> None:
-        self.temp_measure = self.current_measure.copy()
         super()._handle_coordinator_update()
-        self._update_measures()
         self._accumulate_energy()
 
     def _accumulate_energy(self) -> None:
-        """Add the latest interval increment to the running cumulative total.
-
-        Skips negative or zero increments (e.g. duplicate timestamps,
-        clock skew). Initialises the running total on the first valid
-        increment when no restored value is available.
-        """
+        """Integrate the latest power reading into the cumulative kWh total."""
         if self.device_class != SensorDeviceClass.ENERGY:
             return
-        increment = self._compute_energy_increment()
+        current = self._create_measure(self._component)
+        if not current:
+            return
+        previous = self.previous_measure
+        # First valid reading: set the integration anchor
+        if not previous:
+            self.previous_measure = current
+            return
+        curr = current.get("date")
+        prev = previous.get("date")
+        interval = self._delta_time_in_hours(curr, prev)
+        # No newer reading (same or older timestamp) -> nothing new to integrate.
+        if interval is None or interval <= 0:
+            # a stable signal keeps the same `last_update`
+            return
+        increment = self._compute_energy_increment(current, previous, interval)
+        # Advance the anchor once per new reading, regardless of the increment.
+        self.previous_measure = current
         if increment is None or increment <= 0:
             return
         base = self._running_total if self._running_total is not None else Decimal(0)
         self._running_total = base + increment
 
-    def _compute_energy_increment(self) -> Decimal | None:
-        """Energy delivered in the latest interval (trapezoidal rule).
-
-        Returns None when either side of the interval is missing or the
-        interval itself is non-positive — the caller will simply not
-        update the cumulative total.
-        """
-        current_date = self.current_measure.get("date")
-        previous_date = self.previous_measure.get("date")
-        current_power = self.current_measure.get("value")
-        previous_power = self.previous_measure.get("value")
+    def _compute_energy_increment(
+        self, current: dict, previous: dict, interval: Decimal
+    ) -> Decimal | None:
+        """Energy delivered in the interval (trapezoidal rule): avg(P) * dt."""
+        current_power = current.get("value")
+        previous_power = previous.get("value")
         if current_power is None or previous_power is None:
-            return None
-        interval = self._delta_time_in_hours(current_date, previous_date)
-        if interval is None or interval <= 0:
             return None
         try:
             current_d = Decimal(str(current_power))
@@ -164,19 +162,6 @@ class Sensor(BaseEntity, RestoreSensor):
         if not delta_seconds:
             return None
         return Decimal(delta_seconds / seconds_in_hour)
-
-    def _update_measures(self):
-        self.current_measure = self._create_measure(self._component)
-        if self._can_update_previous_measure():
-            self.previous_measure = self.temp_measure.copy()
-        self.temp_measure = None
-
-    def _can_update_previous_measure(self) -> bool:
-        temp_date: datetime = self.temp_measure.get("date")
-        current_date: datetime = self.current_measure.get("date")
-        if temp_date and current_date:
-            return (current_date - temp_date).total_seconds() > 0
-        return False
 
     def _create_measure(self, component: VimarSensor | None = None) -> dict:
         if not component or not component.native_value:

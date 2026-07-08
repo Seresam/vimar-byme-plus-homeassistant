@@ -1,6 +1,6 @@
 prettytable
 websocket-client
 zeroconf
-homeassistant==2026.1.0
+homeassistant==2026.6.0
 pip
 ruff

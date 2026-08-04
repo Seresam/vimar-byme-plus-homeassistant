@@ -34,19 +34,40 @@ class UserElement:
         )
 
     @staticmethod
-    def list_from_dict(id_component: int, elems: dict) -> list["UserElement"]:
+    def list_from_dict(
+        id_component: int,
+        elems: dict,
+        track_update: bool = False,
+    ) -> list["UserElement"]:
         elements = []
+
         for elem in elems:
-            elem = UserElement._obj_from_dict(id_component, elem)
-            elements.append(elem)
+            element = UserElement._obj_from_dict(
+                id_component,
+                elem,
+                track_update=track_update,
+            )
+            elements.append(element)
+
         return elements
 
     @staticmethod
-    def _obj_from_dict(id_component: str, elem: dict) -> "UserElement":
+    def _obj_from_dict(
+        id_component: int,
+        elem: dict,
+        track_update: bool = False,
+    ) -> "UserElement":
+        last_update = None
+
+        # Il timestamp viene assegnato solo agli aggiornamenti spontanei
+        # ricevuti tramite "changestatus".
+        if track_update:
+            last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+
         return UserElement(
             enable=elem.get("enable"),
             idcomponent=id_component,
             sfetype=elem.get("sfetype"),
             value=elem.get("value"),
-            last_update=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            last_update=last_update,
         )

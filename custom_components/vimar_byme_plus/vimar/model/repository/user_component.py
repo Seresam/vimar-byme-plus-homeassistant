@@ -61,36 +61,69 @@ class UserComponent:
     @staticmethod
     def list_from_request(request: BaseRequest) -> list["UserComponent"]:
         components = []
+
         for arg in request.args:
-            component = UserComponent._obj_from_sf(None, arg)
+            # I BaseRequest gestiti qui sono aggiornamenti changestatus.
+            component = UserComponent._obj_from_sf(
+                None,
+                arg,
+                track_update=True,
+            )
             components.append(component)
+
         return components
 
     @staticmethod
     def list_from_result(result: dict) -> list["UserComponent"]:
         id_ambient = result.get("idambient")
         sfs = result.get("sf", [])
-        return UserComponent._list_from_sfs(id_ambient, sfs)
+
+        # Dati provenienti da sfdiscovery:
+        # non rappresentano un nuovo evento.
+        return UserComponent._list_from_sfs(
+            id_ambient,
+            sfs,
+            track_update=False,
+        )
 
     @staticmethod
-    def _list_from_sfs(id_ambient: str, sfs: list[dict]) -> "UserComponent":
+    def _list_from_sfs(
+        id_ambient: str,
+        sfs: list[dict],
+        track_update: bool = False,
+    ) -> list["UserComponent"]:
         components = []
+
         for sf in sfs:
-            component = UserComponent._obj_from_sf(id_ambient, sf)
+            component = UserComponent._obj_from_sf(
+                id_ambient,
+                sf,
+                track_update=track_update,
+            )
             components.append(component)
+
         return components
 
     @staticmethod
-    def _obj_from_sf(id_ambient: str, sf: dict) -> "UserComponent":
+    def _obj_from_sf(
+        id_ambient: str | None,
+        sf: dict,
+        track_update: bool = False,
+    ) -> "UserComponent":
         id_component = sf.get("idsf")
         elements = sf.get("elements", [])
+
         return UserComponent(
             idambient=id_ambient,
             dictKey=sf.get("dictKey"),
-            idsf=sf.get("idsf"),
+            idsf=id_component,
             name=sf.get("name"),
             sftype=sf.get("sftype"),
             sstype=sf.get("sstype"),
             ambient=None,
-            elements=UserElement.list_from_dict(id_component, elements),
+            elements=UserElement.list_from_dict(
+                id_component,
+                elements,
+                track_update=track_update,
+            ),
         )

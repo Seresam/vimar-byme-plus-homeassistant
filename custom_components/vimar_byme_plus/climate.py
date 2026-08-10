@@ -19,7 +19,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from . import CoordinatorConfigEntry
 from .base_entity import BaseEntity
 from .coordinator import Coordinator
-from .vimar.model.component.vimar_climate import VimarClimate
+from .vimar.model.component.vimar_climate import ChangeOverMode, VimarClimate
 from .vimar.model.enum.action_type import ActionType
 from .vimar.utils.logger import log_info
 
@@ -169,6 +169,22 @@ class Climate(BaseEntity, ClimateEntity):
             message = "Insufficient permissions to set HVAC mode. Please refer to the ‘Grant Right Permissions’ section in GitHub README."
             raise HomeAssistantError(message)
         self.send(ActionType.SET_HVAC_MODE, hvac_mode.value)
+
+    def turn_on(self) -> None:
+        """Turn the climate on, restoring the real heat/cool selection."""
+        change_over = self._component.change_over_mode
+        if change_over == ChangeOverMode.HEAT and HVACMode.HEAT in self.hvac_modes:
+            target = HVACMode.HEAT
+        elif change_over == ChangeOverMode.COOL and HVACMode.COOL in self.hvac_modes:
+            target = HVACMode.COOL
+        else:
+            target = next((m for m in self.hvac_modes if m != HVACMode.OFF), None)
+        if target:
+            self.set_hvac_mode(target)
+
+    def turn_off(self) -> None:
+        """Turn the climate off."""
+        self.set_hvac_mode(HVACMode.OFF)
 
     def set_temperature(self, **kwargs: Any) -> None:
         """Set new target temperature."""

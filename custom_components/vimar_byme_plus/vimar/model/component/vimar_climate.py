@@ -186,6 +186,7 @@ class VimarClimate(VimarComponent):
     hvac_mode: HVACMode | None
     hvac_modes: list[HVACMode]
     hvac_action: HVACAction | None
+    change_over_mode: ChangeOverMode | None
     current_temperature: float | None
     target_temperature: float | None
     target_temperature_step: float | None

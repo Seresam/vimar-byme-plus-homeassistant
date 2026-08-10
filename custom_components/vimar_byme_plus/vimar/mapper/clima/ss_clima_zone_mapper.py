@@ -36,6 +36,7 @@ class SsClimaZoneMapper:
             hvac_mode=self.hvac_mode(component),
             hvac_modes=self.hvac_modes(component),
             hvac_action=self.hvac_action(component),
+            change_over_mode=self.get_change_over_mode(component),
             preset_mode=self.preset_mode(component),
             preset_modes=self.preset_modes(component),
             fan_mode=self.fan_mode(component),
@@ -103,6 +104,7 @@ class SsClimaZoneMapper:
     ) -> list[ClimateEntityFeature]:
         features = [
             ClimateEntityFeature.TARGET_TEMPERATURE,
+            ClimateEntityFeature.TURN_ON,
             ClimateEntityFeature.TURN_OFF,
             ClimateEntityFeature.PRESET_MODE,
         ]

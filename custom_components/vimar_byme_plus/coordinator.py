@@ -7,7 +7,8 @@ import logging
 from websocket import WebSocketConnectionClosedException
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.const import EVENT_HOMEASSISTANT_STOP
+from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
@@ -64,6 +65,8 @@ class Coordinator(DataUpdateCoordinator[VimarData]):
         self.client.set_setup_code(user_input.get(CODE))
         self._unsub_watchdog: Callable[[], None] | None = None
         self._unsub_realtime: list[Callable[[], None]] = []
+        self._received_data: bool = False
+        self._unsub_stop: Callable[[], None] | None = None
 
         super().__init__(hass, _LOGGER, name=DOMAIN, config_entry=entry)
 
@@ -88,12 +91,46 @@ class Coordinator(DataUpdateCoordinator[VimarData]):
         self.update_data()
         self._setup_watchdog()
         self._setup_realtime()
+        self._setup_shutdown_hook()
 
     def stop(self):
         """Stop coordinator processes."""
+        self._teardown_shutdown_hook()
         self._teardown_realtime()
         self._teardown_watchdog()
         self.client.stop()
+
+    # --- Clean shutdown -----------------------------------------------
+    # Home Assistant does NOT unload config entries when the core stops, so
+    # `async_unload_entry` (our only previous call site for stop()) never runs
+    # on a restart: the websocket stayed open while the event loop was torn
+    # down. Two consequences, both observed:
+    #   - the socket thread kept calling hass.add_job() on a closed loop,
+    #     raising "Event loop is closed" out of on_message;
+    #   - the gateway never saw the session close, so after the restart the
+    #     new session came up without data and every entity stayed
+    #     unavailable until the entry was reloaded by hand.
+    # Closing on EVENT_HOMEASSISTANT_STOP fixes the cause instead of the
+    # symptom: the gateway gets a clean disconnect while the loop is alive.
+
+    def _setup_shutdown_hook(self) -> None:
+        if self._unsub_stop is not None:
+            return
+        self._unsub_stop = self.hass.bus.async_listen_once(
+            EVENT_HOMEASSISTANT_STOP, self._on_hass_stop
+        )
+
+    def _teardown_shutdown_hook(self) -> None:
+        if self._unsub_stop is not None:
+            self._unsub_stop()
+            self._unsub_stop = None
+
+    async def _on_hass_stop(self, _event: Event) -> None:
+        """Close the gateway session before the loop goes away."""
+        self._unsub_stop = None  # the listener is one-shot, don't unsubscribe
+        self._teardown_realtime()
+        self._teardown_watchdog()
+        await self.hass.async_add_executor_job(self.client.stop)
 
     def send(self, component: VimarComponent, action_type: ActionType, *args):
         """Send a request coming from HomeAssistant to Gateway."""
@@ -104,11 +141,17 @@ class Coordinator(DataUpdateCoordinator[VimarData]):
 
     def update_data(self):
         """Update data when new status is received from the Gateway."""
-        self.hass.add_job(self._update_data)
+        if self.hass.is_stopping:
+            return
+        try:
+            self.hass.add_job(self._update_data)
+        except RuntimeError:
+            pass
 
     @callback
     def _update_data(self):
         data = self.client.retrieve_data(self.options)
+        self._received_data = True
         self.async_set_updated_data(data)
 
     async def _async_update_data(self) -> VimarData:
@@ -131,12 +174,15 @@ class Coordinator(DataUpdateCoordinator[VimarData]):
     async def _watchdog_tick(self, _now: datetime) -> None:
         alive = self.client.is_thread_alive()
         stale_seconds = self.client.seconds_since_last_message
-        if alive and stale_seconds < _STALE_THRESHOLD_SECONDS:
+        never_received = not self._received_data
+
+        if alive and stale_seconds < _STALE_THRESHOLD_SECONDS and not never_received:
             return
         _LOGGER.warning(
-            "Vimar watchdog tripped (thread_alive=%s, stale=%.0fs); reconnecting",
+            "Vimar watchdog tripped (thread_alive=%s, stale=%.0fs, never_received=%s); reconnecting",
             alive,
             stale_seconds,
+            never_received,
         )
         await self.hass.async_add_executor_job(self.client.reconnect)
 

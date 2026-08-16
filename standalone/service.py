@@ -1,8 +1,8 @@
-from .vimar.service.gateway_founder_service import GatewayFounderService
-from .vimar.model.gateway.gateway_info import GatewayInfo
 from .vimar.client.vimar_client import VimarClient
 from .vimar.model.exceptions import CodeNotValidException
+from .vimar.model.gateway.gateway_info import GatewayInfo
 from .vimar.model.gateway.vimar_data import VimarData
+from .vimar.service.gateway_founder_service import GatewayFounderService
 
 
 class StandAloneService:

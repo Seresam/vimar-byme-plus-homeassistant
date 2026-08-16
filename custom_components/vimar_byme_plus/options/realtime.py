@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.selector import (
@@ -15,9 +14,9 @@ from homeassistant.helpers.selector import (
 )
 
 from ..const import SECTION_REALTIME
-from .base import OptionsSection
-from ..vimar.model.gateway.vimar_data import VimarData
 from ..vimar.model.component.vimar_button import VimarButton
+from ..vimar.model.gateway.vimar_data import VimarData
+from .base import OptionsSection
 
 _REALTIME_BUTTON_MARKER = "real_time"
 _MIN_INTERVAL = 0

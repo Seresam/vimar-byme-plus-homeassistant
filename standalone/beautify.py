@@ -1,8 +1,9 @@
 from prettytable import PrettyTable
-from .vimar.model.gateway.vimar_data import VimarData
+
 from .vimar.model.component.vimar_component import (
     VimarComponent,
 )
+from .vimar.model.gateway.vimar_data import VimarData
 from .vimar.utils.logger import log_info
 
 

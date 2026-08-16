@@ -29,13 +29,28 @@ class SsSceneExecutorMapper:
 
     def _executed(self, component: UserComponent) -> bool:
         value = component.get_value(SfeType.STATE_EXECUTED)
+
         if value != "Executed":
             return False
+
         last_update = self._last_update(component)
-        return (datetime.now() - last_update) <= timedelta(seconds=2)
+
+        # Una scena presente nella sfdiscovery ha last_update=None
+        # e non deve essere interpretata come appena eseguita.
+        if last_update is None:
+            return False
+
+        age = datetime.now() - last_update
+
+        return timedelta(0) <= age <= timedelta(seconds=2)
 
     def _last_update(self, component: UserComponent) -> datetime | None:
         value = component.get_last_update(SfeType.STATE_EXECUTED)
+
         if not value:
             return None
-        return datetime.fromisoformat(value)
+
+        try:
+            return datetime.fromisoformat(value)
+        except (TypeError, ValueError):
+            return None

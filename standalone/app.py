@@ -1,5 +1,5 @@
-from .service import StandAloneService
 from .beautify import beautify
+from .service import StandAloneService
 
 if __name__ == "__main__":
     # start_monitoring()

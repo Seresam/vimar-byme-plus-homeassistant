@@ -9,7 +9,7 @@ from homeassistant.components.sensor import (
     RestoreSensor,
     SensorDeviceClass,
 )
-from homeassistant.components.sensor.const import SensorStateClass, UNIT_CONVERTERS
+from homeassistant.components.sensor.const import UNIT_CONVERTERS, SensorStateClass
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import StateType

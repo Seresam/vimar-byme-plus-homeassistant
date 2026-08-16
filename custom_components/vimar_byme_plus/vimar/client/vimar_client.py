@@ -2,6 +2,8 @@
 
 from ..config.const import USERNAME
 from ..database.database import Database
+from ..database.repository.component_repo import ComponentRepo
+from ..database.repository.user_repo import UserRepo
 from ..mapper.vimar_data_mapper import VimarDataMapper
 from ..model.component.vimar_component import VimarComponent
 from ..model.enum.action_type import ActionType
@@ -12,9 +14,6 @@ from ..model.integration_options import IntegrationOptions
 from ..model.repository.user_credentials import UserCredentials
 from ..service.association_service import AssociationService
 from ..service.operational_service import OperationalService, Update
-from ..database.repository.component_repo import ComponentRepo
-from ..database.repository.user_repo import UserRepo
-
 from ..utils.logger import log_info
 from ..utils.thread import Thread
 from ..utils.thread_monitor import thread_exists

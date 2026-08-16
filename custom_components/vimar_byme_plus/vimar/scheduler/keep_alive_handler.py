@@ -1,5 +1,5 @@
-from collections.abc import Callable
 import threading
+from collections.abc import Callable
 
 from ..utils.logger import log_error
 from ..utils.thread import Timer

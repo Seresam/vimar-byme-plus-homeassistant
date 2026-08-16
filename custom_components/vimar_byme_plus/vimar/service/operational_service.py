@@ -1,5 +1,5 @@
-from collections.abc import Coroutine
 import time
+from collections.abc import Coroutine
 from typing import Any
 
 from websocket import WebSocketConnectionClosedException

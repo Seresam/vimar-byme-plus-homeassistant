@@ -5,7 +5,6 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
 from homeassistant import config_entries
 from homeassistant.components import zeroconf
 from homeassistant.config_entries import ConfigEntry, ConfigFlowResult
@@ -56,7 +55,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(
         config_entry: ConfigEntry,
-    ) -> "OptionsFlowHandler":
+    ) -> OptionsFlowHandler:
         """Return the options flow handler."""
         return OptionsFlowHandler(config_entry)
 

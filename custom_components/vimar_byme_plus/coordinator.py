@@ -1,15 +1,14 @@
 """Provides the Vimar Coordinator."""
 
+import logging
 from collections.abc import Callable
 from datetime import datetime, timedelta
-import logging
-
-from websocket import WebSocketConnectionClosedException
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from websocket import WebSocketConnectionClosedException
 
 from .const import (
     ADDRESS,

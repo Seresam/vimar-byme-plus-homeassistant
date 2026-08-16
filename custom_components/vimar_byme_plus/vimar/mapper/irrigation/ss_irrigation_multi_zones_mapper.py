@@ -1,5 +1,5 @@
-from decimal import Decimal
 import json
+from decimal import Decimal
 
 from ...model.component.vimar_button import VimarButton
 from ...model.component.vimar_component import VimarComponent

@@ -1,10 +1,10 @@
 from .....model.component.vimar_action import VimarAction
 from .....model.component.vimar_climate import (
+    ChangeOverMode,
     FanMode,
     HVACMode,
     PresetMode,
     VimarClimate,
-    ChangeOverMode,
 )
 from .....model.component.vimar_component import VimarComponent
 from .....model.enum.action_type import ActionType

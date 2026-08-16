@@ -9,4 +9,4 @@ SECTIONS: tuple[type[OptionsSection], ...] = (
     RealtimeSection,
 )
 
-__all__ = ["OptionsSection", "SECTIONS"]
+__all__ = ["SECTIONS", "OptionsSection"]

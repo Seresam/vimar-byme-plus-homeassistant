@@ -22,14 +22,12 @@ class SsShutterPositionMapper(BaseMapper):
             current_cover_position=self.current_position(component),
             current_tilt_position=self.current_tilt_position(component),
             is_closed=self.is_closed(component),
-            is_closing=self.is_closing(component),
-            is_opening=self.is_opening(component),
+            is_moving=self._is_changing(component),
             supported_features=self.get_supported_features(component),
         )
 
     def current_position(self, component: UserComponent) -> int | None:
-        is_changing = self._is_changing(component)
-        return self._get_position(component) if not is_changing else None
+        return self._get_position(component)
 
     def current_tilt_position(self, component: UserComponent) -> int | None:
         return None
@@ -37,16 +35,6 @@ class SsShutterPositionMapper(BaseMapper):
     def is_closed(self, component: UserComponent) -> bool | None:
         position = self._get_position(component)
         return position == 100
-
-    def is_closing(self, component: UserComponent) -> bool:
-        is_changing = self._is_changing(component)
-        position = self._get_position(component)
-        return is_changing and position > 50
-
-    def is_opening(self, component: UserComponent) -> bool:
-        is_changing = self._is_changing(component)
-        position = self._get_position(component)
-        return is_changing and position <= 50
 
     def get_supported_features(
         self, component: UserComponent

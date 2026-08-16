@@ -20,9 +20,8 @@ class VimarCover(VimarComponent):
     current_cover_position: int | None
     current_tilt_position: int | None
     is_closed: bool | None
-    is_closing: bool | None
-    is_opening: bool | None
     supported_features: list[CoverEntityFeature]
+    is_moving: bool | None = None
 
     @staticmethod
     def get_table_header() -> list:
@@ -32,8 +31,7 @@ class VimarCover(VimarComponent):
             "Type",
             "Position",
             "isClosed",
-            "isOpening",
-            "isClosing",
+            "isMoving",
         ]
 
     def to_table(self) -> list:
@@ -43,6 +41,5 @@ class VimarCover(VimarComponent):
             self.device_name,
             self.current_cover_position,
             self.is_closed,
-            self.is_opening,
-            self.is_closing,
+            self.is_moving,
         ]

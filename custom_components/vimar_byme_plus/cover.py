@@ -57,20 +57,56 @@ class Cover(BaseEntity, CoverEntity):
         position = self._component.current_tilt_position
         return 100 - position if (position is not None) else None
 
+    # Verso del movimento in corso, finché in movimento
+    _heading: str | None = None
+
     @property
     def is_opening(self) -> bool | None:
         """Return if the cover is opening or not. Used to determine state."""
-        return self._component.is_opening
+        if self._component.is_moving is None:
+            return None
+        return self._travel() == "opening"
 
     @property
     def is_closing(self) -> bool | None:
         """Return if the cover is closing or not. Used to determine state."""
-        return self._component.is_closing
+        if self._component.is_moving is None:
+            return None
+        return self._travel() == "closing"
+
+    def _travel(self) -> str | None:
+        """Which way this cover is going, or None if still (or unknowable)."""
+        if not self._component.is_moving:
+            self._heading = None
+            return None
+        target = self.current_cover_position
+        previous = self._previous_position()
+        if target is not None and previous is not None and target != previous:
+            # HA scale: 100 is fully open, so a growing number means opening.
+            self._heading = "opening" if target > previous else "closing"
+        return self._heading
+
+    def _previous_position(self) -> int | None:
+        """The position Home Assistant is still publishing for this entity."""
+        if self.hass is None or not self.entity_id:
+            return None
+        state = self.hass.states.get(self.entity_id)
+        if state is None:
+            return None
+        value = state.attributes.get("current_position")
+        return value if isinstance(value, int) else None
 
     @property
     def is_closed(self) -> bool | None:
         """Return if the cover is closed or not. Used to determine state."""
         return self._component.is_closed
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any] | None:
+        """Espone `moving`: la copertura sta cambiando posizione."""
+        if self._component.is_moving is None:
+            return None
+        return {"moving": self._component.is_moving}
 
     @property
     def supported_features(self) -> CoverEntityFeature:

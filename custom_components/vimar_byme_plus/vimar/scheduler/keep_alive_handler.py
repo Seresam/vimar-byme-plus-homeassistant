@@ -10,7 +10,7 @@ class KeepAliveHandler:
 
     _timer: threading.Timer
 
-    def __init__(self, callback: Callable[[], None] = None):
+    def __init__(self, callback: Callable[[], None] | None = None):
         self._timer = None
         self._callback = callback
 
@@ -29,7 +29,7 @@ class KeepAliveHandler:
         try:
             if self._callback:
                 self._callback()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-except
             log_error(__name__, f"Keep-alive callback raised: {exc!r}")
         self._start_timer()
 

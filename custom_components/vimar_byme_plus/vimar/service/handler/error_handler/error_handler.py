@@ -39,9 +39,7 @@ class ErrorHandler:
         return False
 
     def is_permanent_error(self, message: BaseRequestResponse) -> BaseRequestResponse:
-        if self.is_vimar_permanent_error(message):
-            return True
-        return False
+        return bool(self.is_vimar_permanent_error(message))
 
     def handle_temporary_error(
         self, last_client_message: BaseRequestResponse

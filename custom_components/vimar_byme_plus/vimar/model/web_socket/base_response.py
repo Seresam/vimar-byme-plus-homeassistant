@@ -12,13 +12,13 @@ class BaseResponse(BaseRequestResponse):
     def __init__(
         self,
         type: str = "response",
-        function: str = None,
+        function: str | None = None,
         source: str = get_mac_address(),
-        target: str = None,
-        token: str = None,
-        msgid: str = None,
+        target: str | None = None,
+        token: str | None = None,
+        msgid: str | None = None,
         error: int = 0,
-        result: list = [],
+        result: list | None = None,
     ):
         super().__init__(
             type=type,
@@ -29,4 +29,4 @@ class BaseResponse(BaseRequestResponse):
             msgid=msgid,
         )
         self.error = error
-        self.result = result
+        self.result = result if result is not None else []

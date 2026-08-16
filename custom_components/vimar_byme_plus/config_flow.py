@@ -125,7 +125,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors["base"] = f"Error returned from Gateway: {err.message}"
             except CodeNotValidException:
                 errors["base"] = "invalid_code"
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # noqa: BLE001  # pylint: disable=broad-except
                 log_error("Unexpected exception during the finalization phase")
                 errors["base"] = "unknown"
 

@@ -29,7 +29,7 @@ class WSAttachPhase(WebSocketBaseVimar):
                 self._config.on_open_callback()
             session_response = self.get_mock_session_response()
             self.on_message(ws, message=session_response)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-except
             log_error(__name__, f"on_open raised: {exc!r}")
 
     def on_close(self, ws: WebSocketApp):
@@ -37,7 +37,7 @@ class WSAttachPhase(WebSocketBaseVimar):
             callback = self._config.on_close_callback
             if callback:
                 callback(self.last_server_message)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-except
             log_error(__name__, f"on_close raised: {exc!r}")
 
     def on_message(self, ws: WebSocketApp, message: BaseRequestResponse):
@@ -49,7 +49,7 @@ class WSAttachPhase(WebSocketBaseVimar):
                     ws.close()
                 if request:
                     self.send(request)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-except
             log_error(__name__, f"on_message raised: {exc!r}")
 
     def on_error(self, ws: WebSocketApp, exception: Exception):
@@ -63,7 +63,7 @@ class WSAttachPhase(WebSocketBaseVimar):
                     self.send(request)
                 else:
                     ws.close()
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-except
             log_error(__name__, f"on_error raised: {exc!r}")
 
     def get_mock_session_response(self) -> BaseResponse:

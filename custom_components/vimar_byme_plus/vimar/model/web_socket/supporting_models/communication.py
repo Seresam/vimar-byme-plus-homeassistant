@@ -2,7 +2,6 @@ from dataclasses import dataclass
 from enum import Enum
 
 
-@dataclass
 class CommunicationMode(Enum):
     ON_DEMAND_TCP = 1
     ALWAYS_ACTIVE_TCP = 2
@@ -16,7 +15,12 @@ class Communication:
     communicationmode: int | None
     ipport: int | None
 
-    def __init__(self, address: str, port: int = None, mode: CommunicationMode = None):
+    def __init__(
+        self,
+        address: str,
+        port: int | None = None,
+        mode: CommunicationMode | None = None,
+    ):
         self.ipaddress = address
         self.ipport = port
         self.communicationmode = mode.value if mode else None

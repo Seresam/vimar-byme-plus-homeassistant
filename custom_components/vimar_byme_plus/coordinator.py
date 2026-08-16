@@ -242,7 +242,7 @@ class Coordinator(DataUpdateCoordinator[VimarData]):
     def _send_realtime_press(self, button: VimarComponent) -> None:
         try:
             self.client.send(button, ActionType.PRESS)
-        except Exception as exc:  # pylint: disable=broad-except
+        except Exception as exc:  # noqa: BLE001  # pylint: disable=broad-except
             _LOGGER.warning("Realtime auto-press failed for %s: %r", button.id, exc)
 
     def _get_gateway_info(self, user_input: dict[str, str]) -> GatewayInfo:

@@ -16,6 +16,7 @@ import re
 import sqlite3
 import threading
 from sqlite3 import Connection, Error
+from typing import ClassVar
 
 from ..utils.file import get_data_path, get_file_path
 from ..utils.logger import log_error, log_info
@@ -35,7 +36,7 @@ class Database:
     element_repo: ElementRepo
     user_repo: UserRepo
 
-    _instances: dict[str, "Database"] = {}
+    _instances: ClassVar[dict[str, "Database"]] = {}
     _instances_lock = threading.Lock()
     _connection: Connection | None = None
 

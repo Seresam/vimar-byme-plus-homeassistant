@@ -62,7 +62,7 @@ class UserElement:
         # Il timestamp viene assegnato solo agli aggiornamenti spontanei
         # ricevuti tramite "changestatus".
         if track_update:
-            last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")
+            last_update = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")  # noqa: DTZ005
 
         return UserElement(
             enable=elem.get("enable"),

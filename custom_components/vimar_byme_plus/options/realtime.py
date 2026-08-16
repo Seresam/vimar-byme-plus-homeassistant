@@ -103,5 +103,5 @@ class RealtimeSection(OptionsSection):
             data: VimarData = coordinator.data
             buttons: list[VimarButton] = data.get_buttons()
             return [b for b in buttons if _REALTIME_BUTTON_MARKER in str(b.id)]
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001  # pylint: disable=broad-except
             return []

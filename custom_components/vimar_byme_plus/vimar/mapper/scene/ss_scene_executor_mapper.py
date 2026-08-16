@@ -40,7 +40,7 @@ class SsSceneExecutorMapper:
         if last_update is None:
             return False
 
-        age = datetime.now() - last_update
+        age = datetime.now() - last_update  # noqa: DTZ005
 
         return timedelta(0) <= age <= timedelta(seconds=2)
 

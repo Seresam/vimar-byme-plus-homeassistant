@@ -64,7 +64,7 @@ class VimarClient:
         """
         try:
             self._operational_service.disconnect()
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001  # pylint: disable=broad-except
             log_info(__name__, "Disconnect raised; ignoring and re-attaching.")
         self.operational_phase()
 

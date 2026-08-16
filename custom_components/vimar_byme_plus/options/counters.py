@@ -95,5 +95,5 @@ class CountersSection(OptionsSection):
             components = Database.instance(gateway_id).component_repo.get_all()
             sstype = SsType.ENERGY_MEASURE_COUNTER.value
             return [(c.idsf, c.name) for c in components if c.sstype == sstype]
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # noqa: BLE001  # pylint: disable=broad-except
             return []

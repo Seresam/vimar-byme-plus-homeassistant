@@ -2,12 +2,12 @@ from enum import Enum
 
 
 class ComponentType(Enum):
-    LIGHT = {"sftype": "SF_Light"}
-    ENERGY = {"sftype": "SF_Energy"}
-    CLIMA = {"sftype": "SF_Clima"}
-    COVER = {"sftype": "SF_Shutter"}
-    DOOR = {"sftype": "SF_Access"}
-    AUDIO = {"sftype": "SF_Audio"}
+    LIGHT = {"sftype": "SF_Light"}  # noqa: RUF012
+    ENERGY = {"sftype": "SF_Energy"}  # noqa: RUF012
+    CLIMA = {"sftype": "SF_Clima"}  # noqa: RUF012
+    COVER = {"sftype": "SF_Shutter"}  # noqa: RUF012
+    DOOR = {"sftype": "SF_Access"}  # noqa: RUF012
+    AUDIO = {"sftype": "SF_Audio"}  # noqa: RUF012
 
     @staticmethod
     def from_type(value: str):

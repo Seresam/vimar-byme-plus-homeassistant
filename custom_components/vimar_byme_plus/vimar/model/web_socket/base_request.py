@@ -12,13 +12,13 @@ class BaseRequest(BaseRequestResponse):
     def __init__(
         self,
         type: str = "request",
-        function: str = None,
+        function: str | None = None,
         source: str = get_mac_address(),
-        target: str = None,
-        token: str = None,
-        msgid: str = None,
-        args: list = [],
-        params: list = [],
+        target: str | None = None,
+        token: str | None = None,
+        msgid: str | None = None,
+        args: list | None = None,
+        params: list | None = None,
     ):
         super().__init__(
             type=type,
@@ -28,5 +28,5 @@ class BaseRequest(BaseRequestResponse):
             token=token,
             msgid=msgid,
         )
-        self.args = args
-        self.params = params
+        self.args = args if args is not None else []
+        self.params = params if params is not None else []

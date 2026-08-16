@@ -15,11 +15,11 @@ class UserCredentials:
 
     def __init__(
         self,
-        username: str = None,
-        useruid: str = None,
-        password: str = None,
-        setup_code: str = None,
-        plant_name: str = None,
+        username: str | None = None,
+        useruid: str | None = None,
+        password: str | None = None,
+        setup_code: str | None = None,
+        plant_name: str | None = None,
     ):
         self.username = username
         self.setup_code = setup_code

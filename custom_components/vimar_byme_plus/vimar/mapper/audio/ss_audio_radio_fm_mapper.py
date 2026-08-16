@@ -116,7 +116,7 @@ class SsAudioRadioFmMapper:
             frequency_id_json = json.loads(frequency_id)
             if frequency_id_json["found"]:
                 return int(frequency_id_json["position"])
-        except Exception:
+        except Exception:  # noqa: BLE001
             return 0
 
     def _get_frequency_name_by_id(
@@ -126,7 +126,7 @@ class SsAudioRadioFmMapper:
             frequencies = component.get_value(SfeType.STATE_MEM_FREQUENCY_NAMES)
             frequencies_json = json.loads(frequencies)
             return frequencies_json[f"freq{frequency_id}_name"]
-        except Exception:
+        except Exception:  # noqa: BLE001
             return "Manual"
 
     def _get_frequency_sources(self, component: UserComponent) -> list[Source] | None:
@@ -140,7 +140,7 @@ class SsAudioRadioFmMapper:
                 sources.append(source)
             sources.append(self._get_source(component, -1, "Manual"))
             return sources
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log_error(__name__, f"Exception occurred: {e}")
             return None
 
@@ -153,7 +153,7 @@ class SsAudioRadioFmMapper:
                 name = frequencies_json[f"freq{i + 1}_name"]
                 sources.append(name)
             return sources
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
             log_error(__name__, f"An exception occurred: {e}")
             return None
 

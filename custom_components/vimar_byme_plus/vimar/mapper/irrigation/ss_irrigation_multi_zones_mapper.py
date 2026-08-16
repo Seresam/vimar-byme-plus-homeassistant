@@ -94,7 +94,7 @@ class SsIrrigationMultiZonesMapper:
             settings_json = json.loads(settings)
             periods: list = settings_json["OutputsActivationPeriod"]
             return len(periods)
-        except Exception:
+        except Exception:  # noqa: BLE001
             return 0
 
     def _get_current_zone(self, component: UserComponent) -> str:

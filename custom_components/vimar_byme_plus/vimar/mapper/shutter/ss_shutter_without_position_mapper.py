@@ -22,8 +22,7 @@ class SsShutterWithoutPositionMapper(BaseMapper):
             current_cover_position=None,
             current_tilt_position=None,
             is_closed=None,
-            is_closing=None,
-            is_opening=None,
+            is_moving=self._is_changing(component),
             supported_features=self.get_supported_features(component),
         )
 

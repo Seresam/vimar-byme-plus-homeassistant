@@ -21,8 +21,6 @@ class SsAccessGateMapper:
             current_cover_position=self.current_position(component),
             current_tilt_position=None,
             is_closed=self.is_closed(component),
-            is_closing=False,
-            is_opening=False,
             supported_features=self.get_supported_features(component),
         )
 

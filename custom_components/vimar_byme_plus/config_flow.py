@@ -26,15 +26,24 @@ from .coordinator import Coordinator
 from .options import SECTIONS, OptionsSection
 from .vimar.model.exceptions import CodeNotValidException, VimarErrorResponseException
 from .vimar.utils.logger import log_debug, log_error
+from .vimar.model.repository.user_credentials import UserCredentials
 
-ZEROCONF_DATA_SCHEMA = vol.Schema({vol.Required(CODE): str})
+ZEROCONF_DATA_SCHEMA = vol.Schema({
+    vol.Optional(CODE): str,
+    vol.Optional("username"): str,
+    vol.Optional("useruid"): str,
+    vol.Optional("password"): str,
+})
 
 USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(GATEWAY_NAME): str,
         vol.Required(ADDRESS): str,
         vol.Required(GATEWAY_ID): str,
-        vol.Required(CODE): str,
+        vol.Optional(CODE): str,
+        vol.Optional("username"): str,
+        vol.Optional("useruid"): str,
+        vol.Optional("password"): str,
     }
 )
 
@@ -71,7 +80,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id=step_id,
             data_schema=schema,
-            description_placeholders={"url_documentation": DOCUMENTATION_URL},
+            description_placeholders={"url_documentation": DOCUMENTATION_URL, "auth_help": "Inserire il codice di setup oppure username/useruid/password (opzionale)."},
         )
 
     async def async_step_zeroconf(
@@ -94,7 +103,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id=step_id,
             data_schema=schema,
-            description_placeholders={"url_documentation": DOCUMENTATION_URL},
+            description_placeholders={"url_documentation": DOCUMENTATION_URL, "auth_help": "Inserire il codice di setup oppure username/useruid/password (opzionale)."},
         )
 
     async def async_step_discovery_confirm(
@@ -103,13 +112,14 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """Confirm discovery."""
         step_id = "discovery_confirm"
         schema = ZEROCONF_DATA_SCHEMA
-        if user_input and CODE in user_input:
+        # Accept the form even when CODE is omitted (alternate attach flow may use username/password)
+        if user_input is not None:
             user_input = self._enhance_user_input(user_input)
             return await self._initialize(step_id, schema, user_input)
         return self.async_show_form(
             step_id=step_id,
             data_schema=schema,
-            description_placeholders={"url_documentation": DOCUMENTATION_URL},
+            description_placeholders={"url_documentation": DOCUMENTATION_URL, "auth_help": "Inserire il codice di setup oppure username/useruid/password (opzionale)."},
         )
 
     async def _initialize(
@@ -131,7 +141,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         description_placeholders = None
         if step_id in ("user", "discovery_confirm"):
-            description_placeholders = {"url_documentation": DOCUMENTATION_URL}
+            description_placeholders = {"url_documentation": DOCUMENTATION_URL, "auth_help": "Inserire il codice di setup oppure username/useruid/password (opzionale)."}
         return self.async_show_form(
             step_id=step_id,
             data_schema=data_schema,
@@ -141,10 +151,24 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _finalize(self, user_input: dict[str, str]) -> ConfigFlowResult:
         """Finalize the config flow."""
-        coordinator = Coordinator(self.hass, user_input)
+        # Build an optional initial credentials object from supplied fields
+        username = user_input.get("username")
+        useruid = user_input.get("useruid")
+        password = user_input.get("password")
+        initial_creds = None
+        if username and password:
+            initial_creds = UserCredentials(username=username, useruid=useruid, password=password)
+
+        coordinator = Coordinator(self.hass, user_input, initial_user_credentials=initial_creds)
+
+        # Run association (AssociationService will persist credentials if needed)
         await self.hass.async_add_executor_job(coordinator.associate)
         title = user_input[GATEWAY_NAME]
-        user_input.pop(CODE)
+        # Remove sensitive fields before persisting into the config entry
+        user_input.pop(CODE, None)
+        user_input.pop("password", None)
+        user_input.pop("username", None)
+        user_input.pop("useruid", None)
         return self.async_create_entry(title=title, data=user_input)
 
     def _enhance_user_input(self, user_input: dict[str, str]) -> dict[str, str]:

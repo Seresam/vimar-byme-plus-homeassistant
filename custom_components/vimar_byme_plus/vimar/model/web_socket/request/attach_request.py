@@ -43,11 +43,24 @@ class AttachRequest(BaseRequest):
     def get_client_info(
         self, credentials: UserCredentials, protocol_version: str
     ) -> ClientInfo:
+        # For the new authentication type (user accounts) send the gateway
+        # the official client info used by the vendor app.
+        username = (credentials.username or "") if credentials else ""
+        if "@" in username:
+            return ClientInfo(
+                client_tag="userapp",
+                sf_model_version="1.0.0",
+                protocol_version=protocol_version,
+                manufacturer_tag="Vimar",
+                lang="it",
+            )
+        # Fallback: third-party client information (legacy behavior)
         return ClientInfo(
             client_tag="thirdpartyapp",
             sf_model_version="1.0.0",
             protocol_version=protocol_version,
             manufacturer_tag=credentials.username,
+            lang=None,
         )
 
     def get_communication(self, ip_address: str) -> Communication:

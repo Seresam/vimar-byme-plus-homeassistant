@@ -7,6 +7,7 @@ class ClientInfo:
     sfmodelversion: str
     protocolversion: str
     manufacturertag: str | None = None
+    lang: str | None = None
 
     def __init__(
         self,
@@ -14,8 +15,10 @@ class ClientInfo:
         sf_model_version: str,
         protocol_version: str,
         manufacturer_tag: str | None = None,
+        lang: str | None = None,
     ):
         self.clienttag = client_tag
         self.sfmodelversion = sf_model_version
         self.protocolversion = protocol_version
         self.manufacturertag = manufacturer_tag
+        self.lang = lang

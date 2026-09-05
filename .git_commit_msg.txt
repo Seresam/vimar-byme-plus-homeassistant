@@ -1,7 +1,0 @@
-Add alternative "attach" auth flow (username/useruid/password)
-
-Support an alternative authentication path that accepts username, useruid and password instead of the setup code. The config flow accepts optional username/useruid/password and passes an in-memory UserCredentials object through Coordinator -> VimarClient -> AssociationService; persistence to the per-gateway DB is centralized in AssociationService. Attach payload now uses clientinfo {clienttag:"userapp", manufacturertag:"Vimar", lang:"it"} when the username looks like an email.
-
-Files changed: custom_components/vimar_byme_plus/config_flow.py, custom_components/vimar_byme_plus/coordinator.py, custom_components/vimar_byme_plus/vimar/client/vimar_client.py, custom_components/vimar_byme_plus/vimar/service/association_service.py, custom_components/vimar_byme_plus/AUTH_ATTACH.md
-
-Co-authored-by: Copilot App <223556219+Copilot@users.noreply.github.com>

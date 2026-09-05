@@ -29,6 +29,7 @@ from .vimar.model.enum.action_type import ActionType
 from .vimar.model.gateway.gateway_info import GatewayInfo
 from .vimar.model.gateway.vimar_data import VimarData
 from .vimar.model.integration_options import IntegrationOptions
+from .vimar.model.repository.user_credentials import UserCredentials
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -56,11 +57,13 @@ class Coordinator(DataUpdateCoordinator[VimarData]):
         hass: HomeAssistant,
         user_input: dict[str, str],
         entry: ConfigEntry | None = None,
+        initial_user_credentials: UserCredentials | None = None,
     ) -> None:
         """Initialize the coordinator."""
         self._entry = entry
         self.gateway_info = self._get_gateway_info(user_input)
-        self.client = VimarClient(self.gateway_info, self.update_data)
+        # Pass any initial credentials to the client so AssociationService can use them
+        self.client = VimarClient(self.gateway_info, self.update_data, initial_user_credentials)
         self.client.set_setup_code(user_input.get(CODE))
         self._unsub_watchdog: Callable[[], None] | None = None
         self._unsub_realtime: list[Callable[[], None]] = []

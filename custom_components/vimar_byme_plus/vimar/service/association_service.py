@@ -23,13 +23,16 @@ class AssociationService:
     _user_repo: UserRepo
     _authenticator_client = AuthenticatorClient()
 
-    def __init__(self, gateway_info: GatewayInfo) -> None:
+    def __init__(self, gateway_info: GatewayInfo, initial_credentials: UserCredentials | None = None) -> None:
         """Initialize Vimar intagration."""
         self.gateway_address = gateway_info.address
         self.session_port = gateway_info.port
         self.gateway_info = gateway_info
         self._user_repo = Database.instance(gateway_info.deviceuid).user_repo
         self._message_handler = MessageHandler(gateway_info)
+        # Credentials optionally provided by the config flow; AssociationService
+        # will decide whether to persist them or use the remote signer.
+        self._initial_credentials = initial_credentials
 
     def associate(self):
         """Handle the connection Vimar WebSocket connection."""
@@ -91,9 +94,23 @@ class AssociationService:
 
     def get_signed_credentials(self) -> UserCredentials:
         client = self._authenticator_client
+        # If credentials are already present in DB use them
         credentials = self._user_repo.get_current_user()
         if credentials and credentials.password:
             return credentials
+
+        # If the config flow supplied explicit credentials, persist and use them
+        if hasattr(self, "_initial_credentials") and self._initial_credentials:
+            ic = self._initial_credentials
+            if ic.password:
+                # Persist: ensure a row exists then update (matches existing update logic)
+                self._user_repo.delete_all()
+                insert_creds = UserCredentials(username=ic.username, setup_code=None)
+                self._user_repo.insert(insert_creds)
+                self._user_repo.update(ic)
+                return ic
+
+        # Fallback to remote signer
         signed_credentials = client.get_association_credentials(credentials)
         self._user_repo.update(signed_credentials)
         return signed_credentials

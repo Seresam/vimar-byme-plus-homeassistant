@@ -28,12 +28,14 @@ class VimarClient:
     _user_repo: UserRepo
     _thread_name = "VimarServiceThread"
 
-    def __init__(self, gateway_info: GatewayInfo, callback: Update) -> None:
+    def __init__(self, gateway_info: GatewayInfo, callback: Update, initial_user_credentials: UserCredentials | None = None) -> None:
         """Initialize the coordinator."""
         db = Database.instance(gateway_info.deviceuid)
         self._component_repo = db.component_repo
         self._user_repo = db.user_repo
-        self._association_service = AssociationService(gateway_info)
+        # Pass initial credentials (if any) to the association service; it will
+        # decide whether to persist them or call the remote signer.
+        self._association_service = AssociationService(gateway_info, initial_user_credentials)
         self._operational_service = OperationalService(gateway_info, callback)
 
     def association_phase(self):
